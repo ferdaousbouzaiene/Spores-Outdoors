@@ -23,7 +23,7 @@ def fetch_weather(city, api_key, units="metric"):
     return r.json()
 
 # --- UI ---
-st.title("🍄🥾 Spores & Outdoors")
+st.title("🍄🥾 Spores & Outdoors 🍀🏃🏼‍♂️")
 st.caption("Is today for mushrooms, hiking, or Netflix?")
 
 city = st.text_input("Enter a city", "Berlin")
@@ -58,7 +58,7 @@ if st.button("Check conditions"):
     m_score = mushroom_score(weather)
     h_score = hiking_score(weather)
 
-    st.subheader("Scores")
+    st.subheader("Verdict?")
     st.write(f"🍄 Mushroom Foraging Score: **{m_score}/10**")
     st.write(f"🥾 Hiking Score: **{h_score}/10**")
 
