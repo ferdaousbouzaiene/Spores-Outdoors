@@ -1,7 +1,7 @@
 import os
 import streamlit as st
 import requests
-from advisor import hiking_score, hiking_score
+from advisor import mushroom_score, hiking_score
 
 import base64
 st.set_page_config(page_title="Spores & Outdoors", page_icon="🍄🥾")
