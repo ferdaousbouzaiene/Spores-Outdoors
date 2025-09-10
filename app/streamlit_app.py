@@ -5,6 +5,32 @@ from advisor import mushroom_score, hiking_score
 
 import base64
 st.set_page_config(page_title="Spores & Outdoors", page_icon="🍄🥾")
+st.markdown(
+    """
+    <style>
+    /* Import a Google Font */
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Roboto:wght@300;500&display=swap');
+
+    /* Change overall app font */
+    html, body, [class*="css"]  {
+        font-family: 'Quicksand', sans-serif;
+    }
+
+    /* Style headers (title, subheaders) */
+    h1, h2, h3 {
+        font-family: 'Quicksand', cursive;
+        color: #2E8B57;  /* forest green for vibe */
+    }
+
+    /* Optional: style captions */
+    .stCaption {
+        font-style: italic;
+        color: #555;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
 # --- API key loader ---
@@ -23,14 +49,14 @@ def fetch_weather(city, api_key, units="metric"):
     r = requests.get(url, params={"q": city, "appid": api_key, "units": units}, timeout=10)
     r.raise_for_status()
     return r.json()
-
+@st.cache_data
 def get_base64_image(image_filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     image_path = os.path.join(script_dir, image_filename)
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
-bg_image = get_base64_image("background.jpg")
+bg_image = get_base64_image("background2.jpg")
 
 
 
@@ -54,6 +80,8 @@ st.title("🍄🥾 Spores & Outdoors 🍀")
 st.caption("Is today for mushrooms, hiking, or Netflix?")
 
 city = st.text_input("Enter a city", "Berlin")
+with st.spinner("Fetching weather..."):
+    weather = fetch_weather(city, API_KEY)
 
 if st.button("Check conditions"):
     if not API_KEY:
@@ -80,6 +108,11 @@ if st.button("Check conditions"):
     st.subheader(f"Weather in {city}")
     st.write(f"🌤️ {desc} ({main})")
     st.write(f"🌡️ Temperature: {temp}°C")
+    humidity = weather.get("main", {}).get("humidity", "—")
+    wind = weather.get("wind", {}).get("speed", "—")
+
+    st.write(f"💧 Humidity: {humidity}%")
+    st.write(f"💨 Wind Speed: {wind} m/s")
 
     # Advisor scores
     m_score = mushroom_score(weather)
