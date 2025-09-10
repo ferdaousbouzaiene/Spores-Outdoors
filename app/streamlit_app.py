@@ -1,9 +1,11 @@
 import os
 import streamlit as st
 import requests
-from advisor import mushroom_score, hiking_score
+from advisor import hiking_score, hiking_score
 
+import base64
 st.set_page_config(page_title="Spores & Outdoors", page_icon="🍄🥾")
+
 
 # --- API key loader ---
 def get_api_key():
@@ -22,8 +24,33 @@ def fetch_weather(city, api_key, units="metric"):
     r.raise_for_status()
     return r.json()
 
+def get_base64_image(image_filename):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    image_path = os.path.join(script_dir, image_filename)
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+bg_image = get_base64_image("background.jpg")
+
+
+
+# --- Background image ---
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background-image: url("data:jpg;base64,{bg_image}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # --- UI ---
-st.title("🍄🥾 Spores & Outdoors 🍀🏃🏼‍♂️")
+st.title("🍄🥾 Spores & Outdoors 🍀")
 st.caption("Is today for mushrooms, hiking, or Netflix?")
 
 city = st.text_input("Enter a city", "Berlin")
@@ -45,7 +72,7 @@ if st.button("Check conditions"):
             st.error("Weather service not available right now.")
         st.stop()
 
-    # Show quick weather summary (compact, no fancy columns)
+    # Quick weather summary
     main = weather.get("weather", [{}])[0].get("main", "—")
     desc = weather.get("weather", [{}])[0].get("description", "—").title()
     temp = weather.get("main", {}).get("temp", "—")
