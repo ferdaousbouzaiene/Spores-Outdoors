@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import requests
 from advisor import mushroom_report, hiking_report
+from db import insert_weather, insert_user_query
 from api_fetcher import fetch_weather
 import base64
 
@@ -255,12 +256,17 @@ if check_button or city:
 
         if max(m_score, h_score) < 5:
             st.warning("🏠 Not ideal for outdoor activities today. Perfect time to stay cozy indoors with a good book or movie! ☕")
+            verdict = "indoors"
         elif m_score > h_score:
             st.success("🍄 Exceptional mushroom foraging weather!" if m_score >= 8 else "🍄 Great conditions for mushroom foraging!")
+            verdict = "mushroom"
         elif h_score > m_score:
             st.success("🥾 Perfect hiking weather!" if h_score >= 8 else "🥾 Good day for a hike!")
+            verdict = "hiking"
         else:
             st.info("🌟 Both activities look promising today! Follow your heart and choose your adventure! 🌍")
+            verdict = "either"
+        insert_user_query(city, m_score, h_score, verdict)
 
     except requests.HTTPError as e:
         status = getattr(e.response, "status_code", None)
