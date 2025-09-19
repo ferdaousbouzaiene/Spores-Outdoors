@@ -5,6 +5,9 @@ from advisor import mushroom_report, hiking_report
 from db import insert_weather, insert_user_query
 from api_fetcher import fetch_weather
 import base64
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # --- Page Config 🐼 --- #
 st.set_page_config(

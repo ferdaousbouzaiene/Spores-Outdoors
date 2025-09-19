@@ -1,34 +1,53 @@
+# app/db.py
 import os
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import ArgumentError
+from dotenv import load_dotenv
+import streamlit as st
 
-# Example: postgresql://user:password@localhost:5432/spores
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Load local .env if present
+load_dotenv()
 
-engine = create_engine(DATABASE_URL)
+# --- Resolve DATABASE_URL ---
+DATABASE_URL = None
 
-def insert_weather(city: str, weather: dict):
-    """Insert normalized weather into DB."""
-    sql = text("""
-        INSERT INTO weather_data
-        (city, ts, temperature, humidity, rainfall, wind_speed, condition)
-        VALUES (:city, to_timestamp(:dt), :temp, :hum, :rain, :wind, :cond)
-    """)
+# 1. Try Streamlit secrets
+try:
+    if "DATABASE_URL" in st.secrets:
+        DATABASE_URL = st.secrets["DATABASE_URL"]
+except Exception:
+    pass
+
+# 2. Try system env
+if not DATABASE_URL:
+    DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError(
+        "❌ DATABASE_URL not found. Please set it in .streamlit/secrets.toml or in a .env file"
+    )
+
+# --- Init DB connection ---
+try:
+    engine = create_engine(DATABASE_URL)
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+    print("✅ Connected to database.")
+except ArgumentError as e:
+    raise RuntimeError(f"❌ Invalid DATABASE_URL format: {DATABASE_URL}") from e
+
+# --- Functions ---
+def insert_weather(city, weather_json):
     with engine.begin() as conn:
-        conn.execute(sql, {
-            "city": city,
-            "dt": weather.get("dt", 0),  # Unix timestamp from API
-            "temp": weather.get("main", {}).get("temp"),
-            "hum": weather.get("main", {}).get("humidity"),
-            "rain": weather.get("rain", {}).get("1h", 0),
-            "wind": weather.get("wind", {}).get("speed"),
-            "cond": weather.get("weather", [{}])[0].get("main")
-        })
+        conn.execute(
+            text("INSERT INTO weather_data (city, payload) VALUES (:city, :payload)"),
+            {"city": city, "payload": str(weather_json)}
+        )
 
-def insert_user_query(city: str, m_score: float, h_score: float, reco: str):
-    """Insert user query + scores."""
-    sql = text("""
-        INSERT INTO user_queries (city, mushroom_score, hiking_score, recommendation)
-        VALUES (:city, :m, :h, :r)
-    """)
+def insert_user_query(city, m_score, h_score, verdict):
     with engine.begin() as conn:
-        conn.execute(sql, {"city": city, "m": m_score, "h": h_score, "r": reco})
+        conn.execute(
+            text("INSERT INTO user_queries (city, mushroom_score, hiking_score, verdict) "
+                 "VALUES (:city, :m, :h, :v)"),
+            {"city": city, "m": m_score, "h": h_score, "v": verdict}
+        )
