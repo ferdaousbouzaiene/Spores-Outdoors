@@ -1,6 +1,7 @@
 import os
 from sqlalchemy import create_engine, text
 
+# Example: postgresql://user:password@localhost:5432/spores
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL)
@@ -15,7 +16,7 @@ def insert_weather(city: str, weather: dict):
     with engine.begin() as conn:
         conn.execute(sql, {
             "city": city,
-            "dt": weather.get("dt", 0), 
+            "dt": weather.get("dt", 0),  # Unix timestamp from API
             "temp": weather.get("main", {}).get("temp"),
             "hum": weather.get("main", {}).get("humidity"),
             "rain": weather.get("rain", {}).get("1h", 0),
@@ -31,4 +32,3 @@ def insert_user_query(city: str, m_score: float, h_score: float, reco: str):
     """)
     with engine.begin() as conn:
         conn.execute(sql, {"city": city, "m": m_score, "h": h_score, "r": reco})
-
