@@ -24,6 +24,8 @@ Spores & Outdoors is a playful weather-based app that helps nature and hiking lo
 - **OpenWeatherMap API** - Real-time weather data
 - **Pandas** - Data manipulation and analysis
 - **Streamlit Community Cloud** - Deployment platform
+- **Supabase** - PostgreSQL database for storing weather queries and user interactions
+
 
 ---
 
@@ -32,7 +34,7 @@ Spores & Outdoors is a playful weather-based app that helps nature and hiking lo
 ├── app/
 │   ├── advisor.py          # Core recommendation logic
 │   ├── api_fetcher.py      # Weather API integration
-│   ├── db.py              # Database operations
+│   ├── db.py              # Supabase database operations
 │   ├── streamlit_app.py   # Main Streamlit interface
 │   ├── background2.jpg    # UI background image
 │   └── bg_cool_clear.jpg  # Alternative background
