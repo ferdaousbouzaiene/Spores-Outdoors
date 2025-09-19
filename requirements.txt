@@ -3,3 +3,5 @@ streamlit
 pandas
 matplotlib
 python-dotenv
+sqlalchemy
+psycopg2-binary
